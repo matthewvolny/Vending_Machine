@@ -10,5 +10,5 @@ VALUES (3, 'Sprite', '5');
 INSERT INTO inventory (id, drink_name, quantity)
 VALUES (4, 'Dr. Pepper', '5');
 
-INSERT INTO coins_deposited (id, drink_name, quantity)
+INSERT INTO coins_deposited (id, coins)
 VALUES (1, 0);

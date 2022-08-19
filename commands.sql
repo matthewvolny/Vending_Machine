@@ -1,3 +1,4 @@
+-- rename tables "drinks", "coins"
 CREATE TABLE inventory (
     id serial,
     drink_name text,
@@ -6,6 +7,6 @@ CREATE TABLE inventory (
 
 CREATE TABLE coins_deposited (
     id serial,
-    coins_number int
+    coins int
 );
 
