@@ -10,3 +10,8 @@ CREATE TABLE coins_deposited (
     coins int
 );
 
+CREATE TABLE vended (
+    id serial,
+    drink_name text,
+    quantity int
+);

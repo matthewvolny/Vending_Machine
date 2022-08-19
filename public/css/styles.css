@@ -6,6 +6,18 @@
   margin-top: 1.5rem;
 }
 
-.vend-button {
-  color: red;
+.vending-machine-container {
+  border: 1px solid red;
+}
+
+.inventory-display {
+  border: 1px solid blue;
+}
+
+.coin-display {
+  border: 1px solid orange;
+}
+
+.coin-slot {
+  border: 1px solid green;
 }
