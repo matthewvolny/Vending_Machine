@@ -1,0 +1,22 @@
+{
+  "name": "vend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "db:create": "createdb vending_Machine",
+    "db:destroy": "dropdb vending_Machine",
+    "db:init": "psql -f commands.sql vending_Machine",
+    "db:seed": "psql -f seed.sql vending_Machine",
+    "db:reset": "npm run db:destroy; npm run db:create && npm run db:init",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew Volny",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.1",
+    "nodemon": "^2.0.19",
+    "pg-promise": "^10.11.1"
+  }
+}
