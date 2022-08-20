@@ -1,12 +1,12 @@
 const inventoryDisplay = document.querySelector(".inventory-display");
 const coinSlot = document.querySelector(".coin-slot");
 const coinDisplay = document.querySelector(".coin-display");
-
+const coinReturn = document.querySelector(".coin-return");
+coinDisplay.textContent = "0.00";
 let moneyDeposited = false;
 
-//!move to modules folder
+//!move to modules folder?
 const renderDrinks = (data) => {
-  console.log(data);
   const vendingMachineContainer = document.querySelector(
     ".vending-machine-container"
   );
@@ -26,7 +26,7 @@ const renderDrinks = (data) => {
   });
 };
 
-//!move to modules folder
+//!move to modules folder?
 const renderQuantityRemaining = (data) => {
   const outputString = `${data.quantity} ${data.drink_name}s remaining`;
   inventoryDisplay.textContent = outputString;
@@ -51,7 +51,7 @@ const getInventory = async (item) => {
         method: "GET",
       });
       const data = await response.json();
-      renderDrinks(data);
+      renderDrinks(data, moneyDeposited);
       return data;
     }
   } catch (error) {
@@ -60,8 +60,6 @@ const getInventory = async (item) => {
 };
 
 getInventory();
-
-coinDisplay.textContent = 0;
 
 //!could be in external module
 const sumCoins = async () => {
@@ -72,7 +70,7 @@ const sumCoins = async () => {
     });
     const data = await response.json();
     console.log("coins sum: ", data);
-    coinDisplay.textContent = Number(data[0].sum);
+    coinDisplay.textContent = Number(data[0].sum).toFixed(2);
     return data;
   } catch (error) {
     console.log("Could not retrieve sum");
@@ -85,7 +83,7 @@ const depositCoin = async () => {
   try {
     const response = await fetch(`http://localhost:3000/`, {
       method: "PUT",
-      body: JSON.stringify({ coin: 1 }),
+      body: JSON.stringify({ coin: 0.25 /*, moneyDeposited: moneyDeposited*/ }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -103,7 +101,7 @@ const depositCoin = async () => {
 
 coinSlot.addEventListener("click", depositCoin);
 
-// //!working here currently
+//vend item to user_inventory
 const vendItem = async (item) => {
   console.log("in vend item", item);
   try {
@@ -112,9 +110,25 @@ const vendItem = async (item) => {
     });
     const data = await response.json();
     console.log(data); //1 drink vended
-
+    await sumCoins();
     return data;
   } catch (error) {
     console.log("Could not retrieve inventory");
   }
 };
+
+const returnChange = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+    console.log(data);
+    await sumCoins();
+    return data;
+  } catch (error) {
+    console.log("could not return change");
+  }
+};
+
+coinReturn.addEventListener("click", returnChange);

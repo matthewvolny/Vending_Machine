@@ -19,25 +19,74 @@ router.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/home.html");
 });
 
+//retrieve all inventory
+router.get("/inventory", async (req, res) => {
+  console.log("in inventory");
+  try {
+    const allInventory = await database.any("SELECT * FROM machine_inventory");
+    res.status(200).send(allInventory);
+  } catch (error) {
+    console.log("sorry, no inventory found");
+  }
+});
+
+//retrieve specific inventory
+router.get("/inventory/:item", async (req, res) => {
+  console.log("in get /inventory/:item");
+  try {
+    const drinkData = await database.any(
+      `SELECT * FROM machine_inventory WHERE drink_name = '${req.params.item}'`
+    );
+    res.status(200).send(drinkData);
+  } catch (error) {
+    console.log("sorry, no inventory found");
+  }
+});
+
 //deposit coins
 router.put("/", async (req, res) => {
   console.log("in deposit coin put");
   const coin = req.body.coin;
   try {
-    let queryString = "INSERT INTO coins_deposited (coins) VALUES ($1)";
-    await database.none(queryString, [coin]);
-    res.json({ message: "1 coin deposited" });
-    //!may want to redirect here to display total number of coins inserted, another get req
+    const balance = await database.any("SELECT * FROM deposit");
+    let updatedBalance = Number(balance[0].balance) + Number(coin);
+    let queryString = `UPDATE deposit SET balance = ($1) WHERE coin_type = ($2)`;
+    await database.none(queryString, [updatedBalance, "quarter"]);
+    res.json({ message: ".25 cents deposited" });
   } catch (error) {
     console.log("sorry, cannot accept coin");
   }
 });
 
+// //middleware to determine if there is already a coin inserted
+// router.use("/", async (req, res, next) => {
+//   console.log("in middleware - check for coin");
+//   try {
+//     const sum = await database.any(`SELECT * FROM deposit`);
+//     coinTotal = sum[0].sum;
+//     console.log(coinTotal);
+//     if (coinTotal < 2) {
+//       res
+//         .status(403)
+//         .json({
+//           message:
+//             "Insufficient funds.  Add more $ or click coin return button",
+//         })
+//         .end();
+//     } else {
+//       res.locals.difference = coinTotal - 2;
+//     }
+//   } catch (error) {
+//     console.log("sorry,stuck in middleware - get change");
+//   }
+//   next();
+// });
+
 //retrieve total coins
 router.get("/sum", async (req, res) => {
   console.log("in totalCoins");
   try {
-    const sum = await database.any(`SELECT SUM(coins) FROM coins_deposited`);
+    const sum = await database.any(`SELECT SUM(balance) FROM deposit`);
     coinTotal = sum;
     console.log(sum);
     res.status(200).send(coinTotal);
@@ -46,42 +95,14 @@ router.get("/sum", async (req, res) => {
   }
 });
 
-//retrieve all inventory
-router.get("/inventory", async (req, res) => {
-  console.log("in get /inventory");
-  try {
-    const userInfo = await database.any("SELECT * FROM inventory");
-    console.log(userInfo);
-    res.status(200).send(userInfo);
-  } catch (error) {
-    console.log("sorry, no inventory found");
-  }
-});
-
-//!change all these instances of 'userInfo'
-
-//retrieve specific inventory
-router.get("/inventory/:item", async (req, res) => {
-  console.log("in get /inventory/:item");
-  try {
-    const userInfo = await database.any(
-      `SELECT * FROM inventory WHERE drink_name = '${req.params.item}'`
-    );
-    console.log(userInfo);
-    res.status(200).send(userInfo);
-  } catch (error) {
-    console.log("sorry, no inventory found");
-  }
-});
-
 //middleware to get number of coins before knowing if you can vend (can be used in various places)
 router.use("/inventory/:item", async (req, res, next) => {
   console.log("in middleware - get change");
   try {
-    const sum = await database.any(`SELECT SUM(coins) FROM coins_deposited`);
+    const sum = await database.any(`SELECT SUM(balance) FROM deposit`);
     coinTotal = sum[0].sum;
     console.log(coinTotal);
-    if (coinTotal < 2) {
+    if (coinTotal < 0.5) {
       res
         .status(403)
         .json({
@@ -90,7 +111,7 @@ router.use("/inventory/:item", async (req, res, next) => {
         })
         .end();
     } else {
-      res.locals.difference = coinTotal - 2;
+      res.locals.difference = coinTotal - 0.5;
     }
   } catch (error) {
     console.log("sorry,stuck in middleware - get change");
@@ -101,14 +122,13 @@ router.use("/inventory/:item", async (req, res, next) => {
 //middleware to get remaining drinks
 router.use("/inventory/:item", async (req, res, next) => {
   console.log("in middleware - get remaining drinks");
-
   try {
     const drink = await database.any(
-      `SELECT * FROM inventory WHERE drink_name = '${req.params.item}'`
+      `SELECT * FROM machine_inventory WHERE drink_name = '${req.params.item}'`
     );
     console.log("drink quantity:", drink[0].quantity);
     const drinkQuantity = drink[0].quantity;
-    if (drinkQuantity < 2) {
+    if (drinkQuantity < 1) {
       res
         .status(404)
         .json({
@@ -127,26 +147,55 @@ router.use("/inventory/:item", async (req, res, next) => {
 //vend item, return excess coins, report remaining drinks
 router.put("/inventory/:item", async (req, res) => {
   console.log("in vend put");
-  console.log(req.params.item);
   const drink = req.params.item;
   console.log(drink);
   try {
+    //add drink to user_inventory
     let queryString =
-      "INSERT INTO vended (drink_name, quantity) VALUES ($1, $2)";
+      "INSERT INTO user_inventory (drink_name, quantity) VALUES ($1, $2)";
     await database.none(queryString, [drink, 1]);
 
-    //!update suppply of coins, and drinks
+    //update machine_inventory
+    let queryString2 = `UPDATE machine_inventory SET quantity = ${res.locals.remainingItem} WHERE drink_name = ($1)`;
+    await database.none(queryString2, [drink]);
+
+    //set machine_inventory balance to 0
+    let queryString3 = `UPDATE deposit SET balance = ($1) WHERE coin_type = ($2)`;
+    await database.none(queryString3, [0, "quarter"]);
 
     //!want to return header here that says
-    //1) X of coins returned, delete request (delete request, remove all coins)
-    //2) current inventory of the chose drink remaining (get request, remaining drink of the vended type)
     res.json({
       message: `1 ${drink} vended`,
-      message2: `change is ${res.locals.difference} quarters `,
+      message2: `change is ${res.locals.difference}`,
       message3: `${res.locals.remainingItem} ${drink}s remaining`,
     });
   } catch (error) {
     console.log("sorry, system error");
+  }
+});
+
+//dispense change
+router.delete("/", async (req, res) => {
+  console.log("in delete");
+  try {
+    const sum = await database.any(`SELECT SUM(balance) FROM deposit`);
+    coinTotal = sum[0].sum;
+    console.log(coinTotal);
+    if (Number(coinTotal) === 0) {
+      res.json({ message: `no change to give` });
+    } else {
+      //delete supply of coins
+      let queryString = `DELETE FROM deposit WHERE coin_type=($1)`;
+      await database.none(queryString, "quarter");
+      //set machine_inventory balance to 0
+      let queryString1 =
+        "INSERT INTO deposit (coin_type, balance) VALUES ($1, $2)";
+      await database.none(queryString1, ["quarter", 0]);
+      //!want to return header here that says
+      res.json({ message: `change is ${coinTotal}` });
+    }
+  } catch (error) {
+    console.log("sorry, could not return change in router");
   }
 });
 
