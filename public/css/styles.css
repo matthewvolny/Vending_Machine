@@ -6,70 +6,137 @@
 }
 
 * > * {
-  /* margin-top: 1.5rem; */
+  margin-top: 0.5rem;
+}
+
+body {
+  margin-top: 3rem;
 }
 
 .sub-title {
-  text-align: center;
+  margin-left: 5rem;
 }
 
 .title {
-  text-align: center;
+  margin-left: 5rem;
 }
 
 .vending-machine-container {
   position: relative;
+  margin-top: -1rem;
   margin-left: 3rem;
-  margin-right: 7rem;
-  border: 1px solid blue;
-  width: 60%;
+  margin-right: 8rem;
+  /* border: 1px solid blue; */
+  width: 450px;
   /* max-width: 475px; */
 }
 
 img {
-  border: pink 1px solid;
+  /* border: pink 1px solid; */
   width: 100%;
   z-index: -1;
 }
 
 .items {
-  border: 1px solid red;
-  top: 10%;
-  right: 40%;
-  width: 150px;
+  display: flex;
+  justify-content: space-between;
+  /* border: 1px solid red; */
+  top: 17%;
+  right: 36%;
+  width: 220px;
   position: absolute;
   margin: 0 auto;
+}
+.items div {
+  display: inline;
+  margin-top: 0;
+  padding: 0.1rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  /* border: 1px solid green; */
 }
 
 .inventory-display {
   position: absolute;
-  top: 30%;
-  right: 40%;
+  top: 28%;
+  right: 38%;
   width: 150px;
+  height: 200px;
   padding: 1rem;
-
-  border: 1px solid blue;
-  background: white;
+  text-align: center;
+  /* border: 1px solid blue; */
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .coin-display {
   position: absolute;
-  top: 17%;
-  right: 15.5%;
-  border: 1px solid orange;
+  top: 19%;
+  right: 14%;
+  /* border: 1px solid orange; */
+}
+
+.deposit-coins-notification {
+  position: absolute;
+  top: 35%;
+  left: 110%;
+  padding: 1rem;
+  color: white;
+  width: 225px;
+  height: 36px;
+  text-align: center;
+  background-color: palevioletred;
+  /* border: 1px solid green; */
+}
+
+.deposit-coins-notification:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 42px solid transparent;
+  border-right: 42px solid palevioletred;
+  border-bottom: 42px solid transparent;
+  margin: -24px 0 0 -78px;
+}
+
+.return-coins-notification {
+  position: absolute;
+  top: 50.5%;
+  left: 110%;
+  padding: 1rem;
+  color: white;
+  width: 225px;
+  height: 36px;
+  text-align: center;
+  background-color: cornflowerblue;
+  /* border: 1px solid green; */
+}
+
+.return-coins-notification:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-top: 42px solid transparent;
+  border-right: 42px solid cornflowerblue;
+  border-bottom: 42px solid transparent;
+  margin: -24px 0 0 -86px;
 }
 
 .coin-slot {
   position: absolute;
-  top: 45%;
-  right: 10%;
-  border: 1px solid green;
+  top: 35%;
+  right: 16%;
+  width: 35px;
+  height: 89px;
+  /* border: 1px solid green; */
 }
 
 .coin-return {
   position: absolute;
   position: absolute;
-  top: 55%;
-  right: 10%;
-  border: 1px solid purple;
+  top: 52.8%;
+  right: 10.5%;
+  width: 85px;
+  height: 49px;
+  /* border: 1px solid purple; */
 }

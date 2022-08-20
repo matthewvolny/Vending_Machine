@@ -7,7 +7,7 @@ let moneyDeposited = false;
 
 //!move to modules folder?
 const renderDrinks = (data) => {
-  const vendingMachineContainer = document.querySelector(".items");
+  const items = document.querySelector(".items");
   data.forEach((item) => {
     const drink = document.createElement("div");
     drink.textContent = `${item.drink_name}`;
@@ -20,7 +20,7 @@ const renderDrinks = (data) => {
         getInventory(item.drink_name);
       }
     };
-    vendingMachineContainer.appendChild(drink);
+    items.appendChild(drink);
   });
 };
 
