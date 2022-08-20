@@ -1,27 +1,75 @@
 :root {
   font-size: 1.5rem;
+  letter-spacing: 0.07rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 * > * {
-  margin-top: 1.5rem;
+  /* margin-top: 1.5rem; */
+}
+
+.sub-title {
+  text-align: center;
+}
+
+.title {
+  text-align: center;
 }
 
 .vending-machine-container {
+  position: relative;
+  margin-left: 3rem;
+  margin-right: 7rem;
+  border: 1px solid blue;
+  width: 60%;
+  /* max-width: 475px; */
+}
+
+img {
+  border: pink 1px solid;
+  width: 100%;
+  z-index: -1;
+}
+
+.items {
   border: 1px solid red;
+  top: 10%;
+  right: 40%;
+  width: 150px;
+  position: absolute;
+  margin: 0 auto;
 }
 
 .inventory-display {
+  position: absolute;
+  top: 30%;
+  right: 40%;
+  width: 150px;
+  padding: 1rem;
+
   border: 1px solid blue;
+  background: white;
 }
 
 .coin-display {
+  position: absolute;
+  top: 17%;
+  right: 15.5%;
   border: 1px solid orange;
 }
 
 .coin-slot {
+  position: absolute;
+  top: 45%;
+  right: 10%;
   border: 1px solid green;
 }
 
 .coin-return {
+  position: absolute;
+  position: absolute;
+  top: 55%;
+  right: 10%;
   border: 1px solid purple;
 }

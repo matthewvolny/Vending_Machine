@@ -7,9 +7,7 @@ let moneyDeposited = false;
 
 //!move to modules folder?
 const renderDrinks = (data) => {
-  const vendingMachineContainer = document.querySelector(
-    ".vending-machine-container"
-  );
+  const vendingMachineContainer = document.querySelector(".items");
   data.forEach((item) => {
     const drink = document.createElement("div");
     drink.textContent = `${item.drink_name}`;
