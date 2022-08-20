@@ -1,16 +1,16 @@
--- rename tables "drinks", "coins"
-CREATE TABLE inventory (
+CREATE TABLE machine_inventory (
     id serial,
     drink_name text,
     quantity int
 );
 
-CREATE TABLE coins_deposited (
+CREATE TABLE deposit (
     id serial,
-    coins int
+    coin_type text,
+    balance decimal(6,2)
 );
 
-CREATE TABLE vended (
+CREATE TABLE user_inventory (
     id serial,
     drink_name text,
     quantity int

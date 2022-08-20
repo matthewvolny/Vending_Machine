@@ -11,8 +11,8 @@ const renderDrinks = (data) => {
   data.forEach((item) => {
     const drink = document.createElement("div");
     drink.textContent = `${item.drink_name}`;
-    const id = "drink" + "-" + item.id.toString();
-    drink.setAttribute("id", id);
+    // const id = "drink" + "-" + item.id.toString();
+    // drink.setAttribute("id", id);
     drink.onclick = function () {
       if (moneyDeposited) {
         vendItem(item.drink_name);
@@ -26,17 +26,14 @@ const renderDrinks = (data) => {
 
 //!move to modules folder?
 const renderQuantityRemaining = (data) => {
-  const outputString = `${data.quantity} ${data.drink_name}s remaining`;
-  inventoryDisplay.textContent = outputString;
-  //!can also have a message like, "pay more to purchase, only 50cents!"
+  const outputString = `${data.quantity} ${data.drink_name}s remaining.<br/><br/>Put $ in the coin slot to purchase.`;
+  inventoryDisplay.innerHTML = outputString;
 };
 
-//get all remaining inventory
+//get all/specific inventory
 const getInventory = async (item) => {
-  console.log(item);
   try {
     if (item) {
-      console.log("in if");
       const response = await fetch(`http://localhost:3000/inventory/${item}`, {
         method: "GET",
       });
@@ -44,7 +41,6 @@ const getInventory = async (item) => {
       renderQuantityRemaining(data[0]);
       return data;
     } else {
-      console.log("in else");
       const response = await fetch("http://localhost:3000/inventory", {
         method: "GET",
       });
@@ -53,7 +49,7 @@ const getInventory = async (item) => {
       return data;
     }
   } catch (error) {
-    console.log("Could not retrieve inventory");
+    console.log("cannot retrieve inventory");
   }
 };
 
@@ -61,43 +57,33 @@ getInventory();
 
 //!could be in external module
 const sumCoins = async () => {
-  console.log("in sum coins");
   try {
     const response = await fetch(`http://localhost:3000/sum`, {
       method: "GET",
     });
     const data = await response.json();
-    console.log("coins sum: ", data);
     coinDisplay.textContent = Number(data[0].sum).toFixed(2);
     return data;
   } catch (error) {
-    console.log("Could not retrieve sum");
+    console.log("cannot retrieve sum");
   }
 };
 
 //deposit coin, set money deposited to true
 const depositCoin = async () => {
-  console.log("in deposit coin");
   try {
     const response = await fetch(`http://localhost:3000/`, {
       method: "PUT",
-      body: JSON.stringify({ coin: 0.25 /*, moneyDeposited: moneyDeposited*/ }),
+      body: JSON.stringify({ coin: 0.25 }),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    const data = await response.json();
-    //!if error does not come back, 403 or 404 {
-    //   moneyDeposited = true;
-    // }
-    console.log(response.status);
     moneyDeposited = true;
     await sumCoins();
-    // !can make the message "1 coin deposited appear on screen"
-    console.log(data);
-    return data;
+    return response;
   } catch (error) {
-    console.log("Could not retrieve inventory");
+    console.log("cannot deposit coin");
   }
 };
 
@@ -105,18 +91,13 @@ coinSlot.addEventListener("click", depositCoin);
 
 //vend item to user_inventory
 const vendItem = async (item) => {
-  console.log("in vend item", item);
   try {
     const response = await fetch(`http://localhost:3000/inventory/${item}`, {
       method: "PUT",
     });
     const data = await response.json();
-    console.log("logging vend data", data); //1 drink vended
-
-    if (data.status === "200") {
-      //!if item vended, set moneyDeposited to false
+    if (data.quantity) {
       moneyDeposited = false;
-      //!if insufficient money, do not zero out coins (do not run sum coins?)
       await sumCoins();
     }
 
@@ -131,10 +112,8 @@ const returnChange = async () => {
     const response = await fetch(`http://localhost:3000/`, {
       method: "DELETE",
     });
-    const data = await response.json();
-    console.log(data);
     await sumCoins();
-    return data;
+    return response;
   } catch (error) {
     console.log("could not return change");
   }
