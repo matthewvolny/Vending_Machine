@@ -89,9 +89,13 @@ const depositCoin = async () => {
       },
     });
     const data = await response.json();
+    //!if error does not come back, 403 or 404 {
+    //   moneyDeposited = true;
+    // }
+    console.log(response.status);
     moneyDeposited = true;
     await sumCoins();
-    //!can make the message "1 coin deposited appear on screen"
+    // !can make the message "1 coin deposited appear on screen"
     console.log(data);
     return data;
   } catch (error) {
@@ -109,8 +113,15 @@ const vendItem = async (item) => {
       method: "PUT",
     });
     const data = await response.json();
-    console.log(data); //1 drink vended
-    await sumCoins();
+    console.log("logging vend data", data); //1 drink vended
+
+    if (data.status === "200") {
+      //!if item vended, set moneyDeposited to false
+      moneyDeposited = false;
+      //!if insufficient money, do not zero out coins (do not run sum coins?)
+      await sumCoins();
+    }
+
     return data;
   } catch (error) {
     console.log("Could not retrieve inventory");

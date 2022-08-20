@@ -103,15 +103,15 @@ router.use("/inventory/:item", async (req, res, next) => {
     coinTotal = sum[0].sum;
     console.log(coinTotal);
     if (coinTotal < 0.5) {
-      res
-        .status(403)
-        .json({
-          message:
-            "Insufficient funds.  Add more $ or click coin return button",
-        })
-        .end();
+      res.status(403).json({
+        message: "Insufficient funds.  Add more $ or click coin return button",
+        status: "403",
+      });
+      res.locals.insufficientFunds = true;
+      // .end();
     } else {
       res.locals.difference = coinTotal - 0.5;
+      // next();
     }
   } catch (error) {
     console.log("sorry,stuck in middleware - get change");
@@ -129,19 +129,19 @@ router.use("/inventory/:item", async (req, res, next) => {
     console.log("drink quantity:", drink[0].quantity);
     const drinkQuantity = drink[0].quantity;
     if (drinkQuantity < 1) {
-      res
-        .status(404)
-        .json({
-          message: "Drink is out of stock.  Make another selection",
-        })
-        .end();
+      res.status(404).json({
+        message: "Drink is out of stock.  Make another selection",
+      });
+      res.locals.unavailableSupply = true;
+      // .end();
     } else {
       res.locals.remainingItem = drinkQuantity - 1;
+      next();
     }
   } catch (error) {
     console.log("sorry,stuck in middleware - get change");
   }
-  next();
+  // next();
 });
 
 //vend item, return excess coins, report remaining drinks
@@ -150,25 +150,33 @@ router.put("/inventory/:item", async (req, res) => {
   const drink = req.params.item;
   console.log(drink);
   try {
-    //add drink to user_inventory
-    let queryString =
-      "INSERT INTO user_inventory (drink_name, quantity) VALUES ($1, $2)";
-    await database.none(queryString, [drink, 1]);
+    if (res.locals.insufficientFunds || res.locals.unavailableSupply) {
+      res.json({
+        sufficientFunds: res.locals.sufficientFunds,
+        availableSupply: res.locals.availableSupply,
+      });
+    } else {
+      //add drink to user_inventory
+      let queryString =
+        "INSERT INTO user_inventory (drink_name, quantity) VALUES ($1, $2)";
+      await database.none(queryString, [drink, 1]);
 
-    //update machine_inventory
-    let queryString2 = `UPDATE machine_inventory SET quantity = ${res.locals.remainingItem} WHERE drink_name = ($1)`;
-    await database.none(queryString2, [drink]);
+      //update machine_inventory
+      let queryString2 = `UPDATE machine_inventory SET quantity = ${res.locals.remainingItem} WHERE drink_name = ($1)`;
+      await database.none(queryString2, [drink]);
 
-    //set machine_inventory balance to 0
-    let queryString3 = `UPDATE deposit SET balance = ($1) WHERE coin_type = ($2)`;
-    await database.none(queryString3, [0, "quarter"]);
+      //set machine_inventory balance to 0
+      let queryString3 = `UPDATE deposit SET balance = ($1) WHERE coin_type = ($2)`;
+      await database.none(queryString3, [0, "quarter"]);
 
-    //!want to return header here that says
-    res.json({
-      message: `1 ${drink} vended`,
-      message2: `change is ${res.locals.difference}`,
-      message3: `${res.locals.remainingItem} ${drink}s remaining`,
-    });
+      //!want to return header here that says
+      res.json({
+        message: `1 ${drink} vended`,
+        message2: `change is ${res.locals.difference}`,
+        message3: `${res.locals.remainingItem} ${drink}s remaining`,
+        status: "200",
+      });
+    }
   } catch (error) {
     console.log("sorry, system error");
   }
