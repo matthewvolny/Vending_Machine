@@ -11,8 +11,6 @@ const renderDrinks = (data) => {
   data.forEach((item) => {
     const drink = document.createElement("div");
     drink.textContent = `${item.drink_name}`;
-    // const id = "drink" + "-" + item.id.toString();
-    // drink.setAttribute("id", id);
     drink.onclick = function () {
       if (moneyDeposited) {
         vendItem(item.drink_name);
@@ -26,7 +24,7 @@ const renderDrinks = (data) => {
 
 //!move to modules folder?
 const renderQuantityRemaining = (data) => {
-  const outputString = `${data.quantity} ${data.drink_name}s remaining.<br/><br/>Put $ in the coin slot to purchase.`;
+  const outputString = `<div>${data.quantity} ${data.drink_name}s remaining.</div><div>Put $ in the coin slot to purchase.</div>`;
   inventoryDisplay.innerHTML = outputString;
 };
 
@@ -55,7 +53,7 @@ const getInventory = async (item) => {
 
 getInventory();
 
-//!could be in external module
+//!move to modules folder?
 const sumCoins = async () => {
   try {
     const response = await fetch(`http://localhost:3000/sum`, {
@@ -89,6 +87,26 @@ const depositCoin = async () => {
 
 coinSlot.addEventListener("click", depositCoin);
 
+const renderUserInventory = (drinks) => {
+  inventoryDisplay.innerHTML = `<div></div>`;
+  drinks.forEach((drink) => {
+    inventoryDisplay.innerHTML += `<div class="user-drinks-message">You have ${drink.quantity} ${drink.drink_name}s</div>`;
+  });
+};
+
+const getUserInventory = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/user-inventory", {
+      method: "GET",
+    });
+    const data = await response.json();
+    renderUserInventory(data);
+    return data;
+  } catch (error) {
+    console.log("cannot retrieve inventory");
+  }
+};
+
 //vend item to user_inventory
 const vendItem = async (item) => {
   try {
@@ -99,8 +117,8 @@ const vendItem = async (item) => {
     if (data.quantity) {
       moneyDeposited = false;
       await sumCoins();
+      getUserInventory();
     }
-
     return data;
   } catch (error) {
     console.log("Could not retrieve inventory");

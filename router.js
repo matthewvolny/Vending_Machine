@@ -111,9 +111,13 @@ router.use("/inventory/:item", async (req, res, next) => {
 router.put("/inventory/:item", async (req, res) => {
   const drink = req.params.item;
   try {
+    const userDrinkQuantity = await database.any(
+      `SELECT quantity FROM user_inventory WHERE drink_name = '${drink}'`
+    );
+    const userHeldDrinks = userDrinkQuantity[0].quantity + 1;
     let queryString =
-      "INSERT INTO user_inventory (drink_name, quantity) VALUES ($1, $2)";
-    await database.none(queryString, [drink, 1]);
+      "Update user_inventory SET quantity = ($1) WHERE drink_name = ($2)";
+    await database.none(queryString, [userHeldDrinks, drink]);
     let queryString2 = `UPDATE machine_inventory SET quantity = ${res.locals.remainingItem} WHERE drink_name = ($1)`;
     await database.none(queryString2, [drink]);
     let queryString3 = `UPDATE deposit SET balance = ($1) WHERE coin_type = ($2)`;
@@ -129,6 +133,16 @@ router.put("/inventory/:item", async (req, res) => {
     console.log(
       "complex error: cannot vend item, set machine inventory, or reset balance"
     );
+  }
+});
+
+//retrieve user inventory
+router.get("/user-inventory", async (req, res) => {
+  try {
+    const allInventory = await database.any("SELECT * FROM user_inventory");
+    res.status(200).send(allInventory);
+  } catch (error) {
+    console.log("no inventory found");
   }
 });
 
