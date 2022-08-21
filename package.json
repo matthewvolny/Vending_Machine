@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "db:create": "createdb vending_Machine",
-    "db:destroy": "dropdb vending_Machine",
-    "db:init": "psql -f commands.sql vending_Machine",
-    "db:seed": "psql -f seed.sql vending_Machine",
-    "db:reset": "npm run db:destroy; npm run db:create && npm run db:init",
+    "db:create": "createdb vending_machine",
+    "db:destroy": "dropdb vending_machine",
+    "db:init": "psql -f schema.sql vending_machine",
+    "db:seed": "psql -f seed.sql vending_machine",
+    "db:reset": "npm run db:destroy; npm run db:create; npm run db:init && npm run db:seed",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matthew Volny",

@@ -3,11 +3,11 @@ const router = express.Router();
 const pgPromise = require("pg-promise")();
 
 const config = {
-  host: "suleiman.db.elephantsql.com",
+  host: "localhost",
   port: 5432,
-  database: "bwmffvjw",
-  user: "bwmffvjw",
-  password: "tKdEwDWKgjIgOqdkIfA06FrvJ3_xOXcJ",
+  database: "vending_machine",
+  user: "", //set by user
+  password: "", //set by user
 };
 
 const database = pgPromise(config);
@@ -97,7 +97,7 @@ router.use("/inventory/:item", async (req, res, next) => {
       res
         .status(404)
         .set({ "X-Inventory-Remaining": `${drinkQuantity} drinks left` })
-        .json({ message: "insufficient funds" });
+        .json({ message: "insufficient supply" });
     } else {
       res.locals.remainingItem = drinkQuantity - 1;
       next();
